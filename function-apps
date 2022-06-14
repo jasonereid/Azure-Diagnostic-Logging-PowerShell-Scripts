@@ -1,0 +1,19 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+
+Get-AzFunctionApp | foreach-object {$_} | select-object | Export-CSV -Path .\all-function-apps.csv
+
+
+
+Import-Csv .\all-function-apps.csv | ForEach-Object {
+	
+	$ResourceId = $($_.Id)
+	$WorkspaceId = "/subscriptions/XXXXXXXXXXX/resourceGroups/XXXXXXXXXX/providers/Microsoft.OperationalInsights/workspaces/XXXXXXXXXX" *** REPLACE WITH YOUR URL***
+	$DiagnosticSettingName = "diagnosticlogs"
+	
+	Set-AzDiagnosticSetting -ResourceId $ResourceId -WorkspaceId $WorkspaceId -Enabled $true
+
+	
+}
+
