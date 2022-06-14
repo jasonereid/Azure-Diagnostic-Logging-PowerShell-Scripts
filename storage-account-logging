@@ -1,0 +1,34 @@
+#use this command to generate your CSV
+
+Get-AzStorageAccount | foreach-object {$_} | select-object | Export-CSV -Path .\all-storage-accounts.csv
+
+
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+Import-Csv .\all-storage-accounts.csv | ForEach-Object {
+    Write-Host "$($_.Id)"
+	
+	$ResourceId = $($_.Id)
+	$WorkspaceId = ******YOUR LOG ANALYTICS WORKSPACE URL HERE***** /subscriptions/xxxxxxx/resourceGroups/xxxxxxxx/providers/Microsoft.OperationalInsights/workspaces/xxxxxxxx
+	$DiagnosticSettingName = "diagnosticlogs"
+
+	$metric = New-AzDiagnosticDetailSetting -Metric -RetentionEnabled -Category AllMetrics -Enabled
+	$setting = New-AzDiagnosticSetting -Name $DiagnosticSettingName -ResourceId $ResourceId -WorkspaceId $WorkspaceId -Setting $metric
+	Set-AzDiagnosticSetting -InputObject $setting
+
+	$metric = New-AzDiagnosticDetailSetting -Metric -RetentionEnabled -Category AllMetrics -Enabled
+	$readlog = New-AzDiagnosticDetailSetting -Log -RetentionEnabled -Category StorageRead -Enabled
+	$writelog = New-AzDiagnosticDetailSetting -Log -RetentionEnabled -Category StorageWrite -Enabled
+	$deletelog = New-AzDiagnosticDetailSetting -Log -RetentionEnabled -Category StorageDelete -Enabled
+	$Ids = @($ResourceId + "/blobServices/default"
+        	$ResourceId + "/fileServices/default"
+	        $ResourceId + "/queueServices/default"
+	        $ResourceId + "/tableServices/default"
+	)
+	$Ids | ForEach-Object {
+	    $setting = New-AzDiagnosticSetting -Name $DiagnosticSettingName -ResourceId $_ -WorkspaceId $WorkspaceId -Setting $metric,$readlog,$writelog,$deletelog
+	    Set-AzDiagnosticSetting -InputObject $setting
+	}
+}
