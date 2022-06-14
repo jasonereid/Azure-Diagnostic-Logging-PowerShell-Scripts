@@ -1,0 +1,22 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+
+# set the subscription
+Select-AzSubscription -SubscriptionId xxxxxx-xxxxx-xxxx-xxxx-xxxxxxxxx
+# get all the sql servers
+Get-AzSqlServer | Export-CSV -Path ".\all-sqlservers.csv"
+# importing the servers, iterating through each of them to get the databases
+Import-Csv .\all-sqlservers.csv | ForEach-Object {
+	$ServerName = $($_.ServerName)
+	$ResourceGroupName = $($_.ResourceGroupName)
+	Get-AzSqlDatabase -ServerName $ServerName -ResourceGroupName $ResourceGroupName | ForEach-Object {
+	#getting the databases
+	$ResourceId = $($_.ResourceId)
+	$WorkspaceId = "/subscriptions/xxxxxx-xxxxx-xxxx-xxxx-xxxxxxxxx/resourceGroups/xxxxxx/providers/Microsoft.OperationalInsights/workspaces/xxxxxxxxx"
+	$DiagnosticSettingName = "diagnosticlogs"
+	#setting the diagnostics
+	Set-AzDiagnosticSetting -ResourceId $ResourceId -WorkspaceId $WorkspaceId -Enabled $true
+	
+}
+}
