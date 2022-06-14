@@ -1,0 +1,19 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+
+Get-AzVirtualNetwork | foreach-object {$_} | select-object | Export-CSV -Path .\all-vnets90.csv
+
+
+
+Import-Csv .\all-vnets90.csv | ForEach-Object {
+	
+	$ResourceId = $($_.Id)
+	$WorkspaceId = "/subscriptions/xxxxxxx/resourceGroups/HiscInfrastructure/providers/Microsoft.OperationalInsights/workspaces/xxxxxxx"
+	$DiagnosticSettingName = "diagnosticlogs"
+	
+	Set-AzDiagnosticSetting -ResourceId $ResourceId -WorkspaceId /subscriptions/xxxxxxx/resourceGroups/HiscInfrastructure/providers/Microsoft.OperationalInsights/workspaces/xxxxxxx -Enabled $true
+
+	
+}
+
