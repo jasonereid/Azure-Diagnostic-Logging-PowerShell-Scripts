@@ -1,0 +1,17 @@
+
+Get-AzAppServicePlan | foreach-object {$_} | select-object | Export-CSV -Path .\all-apps1.csv
+
+
+
+Import-Csv .\all-apps1.csv | ForEach-Object {
+	
+	$ResourceId = $($_.Id)
+	$WorkspaceId = "/subscriptions/xxxxxxxxxx/resourceGroups/HiscInfrastructure/providers/Microsoft.OperationalInsights/workspaces/xxxxxxxxx"
+	$DiagnosticSettingName = "diagnosticlogs"
+	
+	Set-AzDiagnosticSetting -ResourceId $ResourceId -WorkspaceId /subscriptions/xxxxxxxxx/resourceGroups/HiscInfrastructure/providers/Microsoft.OperationalInsights/workspaces/xxxxxxxxx -Enabled $true
+
+	
+}
+
+
